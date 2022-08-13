@@ -10,22 +10,14 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 
-import java.io.File;
+import java.io.*;
 
 @RestController
 public class TestController {
-    String bucketName = "testbucket-1823787";
+    String bucketName = "uploads-76078f4";
 
     static class TestDetails {
         String s3Key;
-
-        public void setS3Key(String s3Key) {
-            this.s3Key = s3Key;
-        }
-
-        public String getS3Key() {
-            return s3Key;
-        }
     }
 
     @PostMapping("/")
@@ -37,17 +29,31 @@ public class TestController {
         try {
             File outFile = new File("/tmp/tmpfile.txt");
 
-            ObjectMetadata metadata = s3.getObject(new GetObjectRequest(bucketName, testDetails.s3Key), outFile);
+            System.out.println("Downloading file");
+
+            s3.getObject(new GetObjectRequest(bucketName, testDetails.s3Key), outFile);
 
             System.out.println("Saved file");
 
-            return "200 OK";
+            try (BufferedReader br = new BufferedReader(new FileReader("/tmp/tmpfile.txt"))) {
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+
+                while (line != null) {
+                    sb.append(line);
+                    sb.append(System.lineSeparator());
+                    line = br.readLine();
+                }
+                return sb.toString();
+            }
         } catch (AmazonServiceException e) {
             System.err.println(e.getErrorMessage());
 
             System.out.println("Failed to save file");
 
             return "500 BAD";
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
