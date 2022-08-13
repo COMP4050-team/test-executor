@@ -1,5 +1,6 @@
 package com.comp4050square.testExecutor.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,6 +9,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.*;
 
@@ -39,7 +41,10 @@ public class TestController {
 
             System.out.println("Downloading file");
 
-            s3.getObject(new GetObjectRequest(bucketName, testDetails.s3Key), outFile);
+            ObjectMetadata metadata = s3.getObject(new GetObjectRequest(bucketName, testDetails.s3Key), outFile);
+            if (metadata == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Key does not exist");
+            }
 
             System.out.println("Saved file");
 
