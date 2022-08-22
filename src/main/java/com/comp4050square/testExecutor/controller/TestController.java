@@ -49,7 +49,7 @@ public class TestController {
 
             System.out.println("Downloading file");
 
-            ObjectMetadata metadata = s3.getObject(new GetObjectRequest(bucketName, testDetails.s3Key), outFile);
+            ObjectMetadata metadata = s3.getObject(new GetObjectRequest(bucketName, testDetails.s3KeyTestFile), outFile);
             if (metadata == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Key does not exist");
             }
