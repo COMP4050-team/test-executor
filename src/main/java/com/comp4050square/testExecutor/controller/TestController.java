@@ -18,15 +18,23 @@ public class TestController {
     String bucketName = "uploads-76078f4";
 
      static class TestDetails {
-        String s3Key;
+         String s3KeyTestFile;
+         String s3KeyProjectFile;
 
-
-         public String getS3Key() {
-             return s3Key;
+         public String getS3KeyTestFile() {
+             return s3KeyTestFile;
          }
 
-         public void setS3Key(String s3Key) {
-             this.s3Key = s3Key;
+         public void setS3KeyTestFile(String s3KeyTestFile) {
+             this.s3KeyTestFile = s3KeyTestFile;
+         }
+
+         public String getS3KeyProjectFileKeyTestFile() {
+             return s3KeyProjectFile;
+         }
+
+         public void setS3KeyProjectFile(String s3KeyProjectFile) {
+             this.s3KeyProjectFile = s3KeyProjectFile;
          }
      }
 
