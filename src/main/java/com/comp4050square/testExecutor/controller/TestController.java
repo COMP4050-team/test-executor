@@ -50,12 +50,16 @@ public class TestController {
 
     @PostMapping("/")
     public String runTest(@RequestBody TestDetails testDetails) {
-        System.out.println("Running test");
 
         final AmazonS3 s3 = AmazonS3ClientBuilder.standard().build();
 
         try {
+            //storing the test file
             File outFile = new File("/tmp/tmpTest.txt");
+            ObjectMetadata metadata = s3.getObject(new GetObjectRequest(bucketName, testDetails.s3KeyTestFile), outFile);
+            if (metadata == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Test Key does not exist");
+            }
 
             //Getting list of files inside the projects
             ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(bucketName).withPrefix(testDetails.s3KeyProjectFile).withDelimiter("/");
@@ -71,16 +75,17 @@ public class TestController {
                 String projectFileName = "/tmp/" + summary.getKey();
                 File projectFile = new File(projectFileName);
                 s3.getObject(new GetObjectRequest(bucketName, summary.getKey()), projectFile);
+                /*
+                creating a new projectfilename then using the converter that I have written, pass the file to it should
+                be void then you should store it in a new location(takes in a
+                 */
             }
 
-            ObjectMetadata metadata = s3.getObject(new GetObjectRequest(bucketName, testDetails.s3KeyTestFile), outFile);
+            System.out.println("Running test");
 
-            if (metadata == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Test Key does not exist");
-            }
-
-            System.out.println("Saved file");
-
+            /*
+            printing output to client
+             */
             try (BufferedReader br = new BufferedReader(new FileReader("/tmp/tmpTest.txt"))) {
                 StringBuilder sb = new StringBuilder();
                 String line = br.readLine();
