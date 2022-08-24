@@ -71,14 +71,16 @@ public class TestController {
                 if(summary.getKey().equals(testDetails.s3KeyProjectFile)){
                     continue;
                 }
-                System.out.println(summary.getKey());
+                
+                //making files in local directory and copying from s3 to local files
                 String projectFileName = "/tmp/" + summary.getKey();
                 File projectFile = new File(projectFileName);
                 s3.getObject(new GetObjectRequest(bucketName, summary.getKey()), projectFile);
-                /*
-                creating a new projectfilename then using the converter that I have written, pass the file to it should
-                be void then you should store it in a new location(takes in a
-                 */
+
+                //parsing the project file and creating the corresponding java file
+                TestParser t = new TestParser(projectFileName);
+                t.readFile();
+                t.createFile();
             }
 
             System.out.println("Running test");
