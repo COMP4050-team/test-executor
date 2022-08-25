@@ -1,7 +1,6 @@
 package com.comp4050square.testExecutor.controller;
 
-import com.amazonaws.services.s3.transfer.*;
-import org.springframework.boot.convert.Delimiter;
+import com.comp4050square.testExecutor.parser.TestParser;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,13 +13,6 @@ import com.amazonaws.services.s3.model.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.*;
-
-import com.amazonaws.services.s3.transfer.MultipleFileDownload;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-
-
-
 
 
 @RestController

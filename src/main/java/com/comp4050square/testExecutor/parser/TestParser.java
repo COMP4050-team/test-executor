@@ -1,4 +1,4 @@
-package com.comp4050square.testExecutor.controller;
+package com.comp4050square.testExecutor.parser;
 
 import spoon.Launcher;
 import spoon.reflect.code.CtStatement;
