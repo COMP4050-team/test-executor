@@ -1,4 +1,4 @@
-package com.comp4050square.testExecutor;
+package com.comp4050square.testExecutor.clients;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
