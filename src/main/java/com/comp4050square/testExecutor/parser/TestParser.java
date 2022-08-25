@@ -20,15 +20,18 @@ import java.util.stream.Collectors;
 
 public class TestParser {
 
-    private final Path path;
-    private String fileName;
+    private final Path filePath;
+    private final String fileName;
     private ArrayList<CtField<?>> globalVariables;
     private CtMethod<?> drawBlock;
     private CtMethod<?> setUpBlock;
     private HashSet<CtMethod<?>> methods;
 
-    public TestParser(String p) {
-        this.path = Path.of(p);
+    public TestParser(String filePath) {
+        this.filePath = Path.of(filePath);
+
+        // Read the file in the given path and create a CtClass to read the content
+        fileName = getFilenameNoExtension(this.filePath.getFileName().toString());
     }
 
     private String getFilenameNoExtension(String fileName) {
@@ -42,11 +45,7 @@ public class TestParser {
     }
 
     public void readFile() throws IOException {
-
-        // Read the file in the given path and create a CtClass to read the content
-        fileName = getFilenameNoExtension(path.getFileName().toString());
-
-        String fileContent = Files.readString(path, StandardCharsets.US_ASCII);
+        String fileContent = Files.readString(filePath, StandardCharsets.US_ASCII);
         CtClass<?> l = Launcher.parseClass("class " + fileName + " {" + fileContent + "}");
 
         // Store draw and setup block in corresponding string
