@@ -22,26 +22,22 @@ public class ProcessingToolsParser {
         boolean compileError = false;
 //        String path = "/tmp/example_assignment/Submissions/s0001_Alice_Penguin_broken/MarchPenguin";
 
-        try {
-            Process process = Runtime.getRuntime().exec(String.format("processing-java --force --sketch=%s --output=/tmp/out --build", path));
+        Process process = Runtime.getRuntime().exec(String.format("processing-java --force --sketch=%s --output=/tmp/out --build", path));
 
-            InputStream serrStream = process.getErrorStream();
-            InputStream soutStream = process.getInputStream();
+        InputStream serrStream = process.getErrorStream();
+        InputStream soutStream = process.getInputStream();
 
-//            String soutString = readStream(soutStream);
-            String errString = readStream(serrStream);
+//        String soutString = readStream(soutStream);
+        String errString = readStream(serrStream);
 
-            if (errString.length() != 0) {
-                compileError = true;
-            }
+        if (errString.length() != 0) {
+            compileError = true;
+        }
 
-            if (compileError) {
-                System.out.println("finished with error");
-            } else {
-                System.out.println("finished");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (compileError) {
+            System.out.println("finished with error");
+        } else {
+            System.out.println("finished");
         }
     }
 }

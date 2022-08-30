@@ -2,7 +2,7 @@ package com.comp4050square.testExecutor.controller;
 
 import com.amazonaws.AmazonServiceException;
 import com.comp4050square.testExecutor.clients.S3Client;
-import com.comp4050square.testExecutor.parser.TestParser;
+import com.comp4050square.testExecutor.parser.ProcessingToolsParser;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,6 +40,10 @@ public class TestController {
     String bucketName = "uploads-76078f4";
 
     private String readFile(String filePath) throws IOException {
+        if (filePath == null) {
+            return "";
+        }
+
         BufferedReader br = new BufferedReader(new FileReader(filePath));
         StringBuilder sb = new StringBuilder();
         String line = br.readLine();
@@ -68,18 +72,19 @@ public class TestController {
 
             // Storing the files locally
             for (String s3Key : projectFiles) {
-                if (s3Key.equals(testDetails.s3KeyProjectFile)) {
-                    continue;
-                }
+//                if (s3Key.equals(testDetails.s3KeyProjectFile)) {
+//                    continue;
+//                }
 
                 // Making files in local directory and copying from s3 to local files
-                String projectFileName = "/tmp/" + s3Key;
-                s3Client.downloadFile(s3Key, projectFileName);
+                String projectFilePath = "/tmp/" + s3Key;
+                s3Client.downloadFile(s3Key, projectFilePath);
+
+                // TODO: need to move Main.pde into a directory called Main
 
                 // Parsing the project file and creating the corresponding java file
-                TestParser t = new TestParser(projectFileName);
-                t.readFile();
-                t.createFile();
+                ProcessingToolsParser parser = new ProcessingToolsParser();
+                parser.parse(projectFilePath);
             }
 
             // Return file content
