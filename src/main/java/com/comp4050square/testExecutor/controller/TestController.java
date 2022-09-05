@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -68,30 +70,29 @@ public class TestController {
             s3Client.downloadFile(testDetails.s3KeyTestFile, "/tmp/tmpTest.txt");
 
             // Getting list of files inside the projects
-            // Getting list of files inside the projects
-            Set<String> projectFiles = s3Client.listObjects(testDetails.s3KeyProjectFile);
+            Set<String> s3ProjectFiles = s3Client.listObjects(testDetails.s3KeyProjectFile);
+
+            // Storing the files locally
+            for (String s3FilePath : s3ProjectFiles) {
+                // Making files in local directory and copying from s3 to local files
+                String projectFilePath = "/tmp/" + s3FilePath;
+                s3Client.downloadFile(s3FilePath, projectFilePath);
+            }
+
             Set<String> projectPaths = new HashSet<>();
-
-            for(String filePath : projectFiles) {
-
-                File file = new File(filePath);
+            for(String filePath : s3ProjectFiles) {
+                File file = new File("/tmp/" + filePath);
                 projectPaths.add(file.getParentFile().getAbsolutePath());
-                
             }
 
             // Storing the files locally
-            for (String projectPath : projectPaths) {
+            for (String localProjectPath : projectPaths) {
 
-                // Making files in local directory and copying from s3 to local files
-                String projectFilePath = "/tmp/" + projectPath;
-//                System.out.println(projectFilePath);
-                s3Client.downloadFile(projectPath, projectFilePath);
-
-                // TODO: need to move Main.pde into a directory called Main
+                // TODO: Check the project structure is correct - i.e. Main.pde in a directory called Main
 
                 // Parsing the project file and creating the corresponding java file
                 ProcessingToolsParser parser = new ProcessingToolsParser();
-                parser.parse(projectFilePath);
+                parser.parse(localProjectPath);
             }
 
             // Return file content

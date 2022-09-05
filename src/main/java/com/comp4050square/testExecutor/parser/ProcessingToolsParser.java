@@ -20,14 +20,12 @@ public class ProcessingToolsParser {
 
     public void parse(String path) throws IOException {
         boolean compileError = false;
-//        String path = "/tmp/example_assignment/Submissions/s0001_Alice_Penguin_broken/MarchPenguin";
 
-        Process process = Runtime.getRuntime().exec(String.format("processing-java --force --sketch=%s --output=/tmp/out --build", path));
+        // TODO: Fix this output path
+        Process process = Runtime.getRuntime().exec(String.format("processing-java --force --sketch=%s --output=/tmp/out/%s --build", path, path));
 
         InputStream serrStream = process.getErrorStream();
-        InputStream soutStream = process.getInputStream();
 
-//        String soutString = readStream(soutStream);
         String errString = readStream(serrStream);
 
         if (errString.length() != 0) {
