@@ -68,17 +68,24 @@ public class TestController {
             s3Client.downloadFile(testDetails.s3KeyTestFile, "/tmp/tmpTest.txt");
 
             // Getting list of files inside the projects
+            // Getting list of files inside the projects
             Set<String> projectFiles = s3Client.listObjects(testDetails.s3KeyProjectFile);
+            Set<String> projectPaths = new HashSet<>();
+
+            for(String filePath : projectFiles) {
+
+                File file = new File(filePath);
+                projectPaths.add(file.getParentFile().getAbsolutePath());
+                
+            }
 
             // Storing the files locally
-            for (String s3Key : projectFiles) {
-//                if (s3Key.equals(testDetails.s3KeyProjectFile)) {
-//                    continue;
-//                }
+            for (String projectPath : projectPaths) {
 
                 // Making files in local directory and copying from s3 to local files
-                String projectFilePath = "/tmp/" + s3Key;
-                s3Client.downloadFile(s3Key, projectFilePath);
+                String projectFilePath = "/tmp/" + projectPath;
+//                System.out.println(projectFilePath);
+                s3Client.downloadFile(projectPath, projectFilePath);
 
                 // TODO: need to move Main.pde into a directory called Main
 

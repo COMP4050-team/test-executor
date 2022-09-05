@@ -32,8 +32,8 @@ public class S3Client {
     public Set<String> listObjects(String s3Prefix) {
         ListObjectsV2Request req = new ListObjectsV2Request()
                 .withBucketName(bucketName)
-                .withPrefix(s3Prefix)
-                .withDelimiter("/");
+                .withPrefix(s3Prefix);
+                // .withDelimiter("/");
 
         ListObjectsV2Result listResult = client.listObjectsV2(req);
 
