@@ -20,9 +20,11 @@ public class ProcessingToolsParser {
 
     public void parse(String path) throws IOException {
         boolean compileError = false;
+        String[] pathList = path.split("/");
+        String outPath = String.format("/tmp/out/%s/%s", pathList[3], pathList[4]);
+        File outFile = new File(outPath);
 
-        // TODO: Fix this output path
-        Process process = Runtime.getRuntime().exec(String.format("processing-java --force --sketch=%s --output=/tmp/out/%s --build", path, path));
+        Process process = Runtime.getRuntime().exec(String.format("/home/alex/Downloads/processing-4.0.1/processing-java --force --sketch=%s --output=%s --build", path, outPath));
 
         InputStream serrStream = process.getErrorStream();
 
