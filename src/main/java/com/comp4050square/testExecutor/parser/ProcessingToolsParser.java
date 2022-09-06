@@ -24,7 +24,7 @@ public class ProcessingToolsParser {
         String outPath = String.format("/tmp/out/%s/%s", pathList[3], pathList[4]);
         File outFile = new File(outPath);
 
-        Process process = Runtime.getRuntime().exec(String.format("/home/alex/Downloads/processing-4.0.1/processing-java --force --sketch=%s --output=%s --build", path, outPath));
+        Process process = Runtime.getRuntime().exec(String.format("processing-java --force --sketch=%s --output=%s --build", path, outPath));
 
         InputStream serrStream = process.getErrorStream();
 
