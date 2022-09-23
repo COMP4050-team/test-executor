@@ -3,17 +3,14 @@ package com.comp4050square.testExecutor.controller;
 import com.amazonaws.AmazonServiceException;
 import com.comp4050square.testExecutor.clients.S3Client;
 import com.comp4050square.testExecutor.parser.ProcessingToolsParser;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
+import java.io.*;
+import java.util.*;
 
 
 @RestController
@@ -85,15 +82,56 @@ public class TestController {
                 projectPaths.add(file.getParentFile().getAbsolutePath());
             }
 
+            // Creating JSON Object and Array
+            JSONObject obj = new JSONObject();
+            JSONArray arr = new JSONArray();
+
             // Storing the files locally
             for (String localProjectPath : projectPaths) {
+
+               Map<String, String> studentResults = new LinkedHashMap<>();
+
+                // Retrieving SID and Student String
+                String[] projectList = localProjectPath.split("/");
+                String[] studentDetails = projectList[projectList.length-2].split("_");
+
+                // Adding SID to Map
+                studentResults.put("SID", studentDetails[0]);
+
+                // Adding Name to Map
+                studentResults.put("Name", studentDetails[1] + " " +studentDetails[2]);
 
                 // TODO: Check the project structure is correct - i.e. Main.pde in a directory called Main
 
                 // Parsing the project file and creating the corresponding java file
                 ProcessingToolsParser parser = new ProcessingToolsParser();
-                parser.parse(localProjectPath);
+                Boolean testPass = parser.parse(localProjectPath);
+                if (testPass)
+                    studentResults.put("Test", "Passed");
+                else
+                    studentResults.put("Test", "Failed");
+
+                // Adding map to JSONArray and clearing the map
+                arr.put(studentResults);
             }
+
+            // Populating JSON Object
+            obj.put("rows", arr);
+
+            // Creating JSON File and writing the JSONObject into it
+            File jsonFile = new File("/tmp/result.json");
+            try {
+                FileWriter writer = new FileWriter(jsonFile);
+                writer.write(obj.toString());
+                writer.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            // Uploading Result to S3
+            String[] uploadPathList = testDetails.s3KeyProjectFile.split("/");
+            String uploadPath = String.format("%s/%s/Results/result.json", uploadPathList[0], uploadPathList[1]);
+            s3Client.uploadFile(uploadPath, jsonFile);
 
             // Return file content
             return readFile("/tmp/tmpTest.txt");

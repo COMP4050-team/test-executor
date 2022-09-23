@@ -17,6 +17,7 @@ public class S3Client {
         this.bucketName = bucketName;
 
         client = AmazonS3ClientBuilder.standard().build();
+
     }
 
     public void downloadFile(String s3Key, String downloadPath) throws IllegalArgumentException {
@@ -27,6 +28,9 @@ public class S3Client {
         if (metadata == null) {
             throw new IllegalArgumentException("Test Key does not exist");
         }
+    }
+    public void uploadFile(String uploadPath, File uploadFile) throws IllegalArgumentException {
+        client.putObject(new PutObjectRequest(bucketName, uploadPath, uploadFile));
     }
 
     public Set<String> listObjects(String s3Prefix) {

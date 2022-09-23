@@ -1,5 +1,6 @@
 package com.comp4050square.testExecutor.parser;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
@@ -18,13 +19,13 @@ public class ProcessingToolsParser {
         return result.toString();
     }
 
-    public void parse(String path) throws IOException {
+    public Boolean parse(String path) throws IOException {
         boolean compileError = false;
         String[] pathList = path.split("/");
-        String outPath = String.format("/tmp/out/%s/%s", pathList[3], pathList[4]);
+        String outPath = String.format("/tmp/out/%s/%s", pathList[pathList.length-2], pathList[pathList.length-1]);
         File outFile = new File(outPath);
 
-        Process process = Runtime.getRuntime().exec(String.format("processing-java --force --sketch=%s --output=%s --build", path, outPath));
+        Process process = Runtime.getRuntime().exec(String.format("/home/alex/Downloads/processing-4.0.1/processing-java --force --sketch=%s --output=%s --build", path, outPath));
 
         InputStream serrStream = process.getErrorStream();
 
@@ -35,9 +36,9 @@ public class ProcessingToolsParser {
         }
 
         if (compileError) {
-            System.out.println("finished with error");
+            return false;
         } else {
-            System.out.println("finished");
+            return true;
         }
     }
 }
