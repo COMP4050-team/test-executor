@@ -118,6 +118,7 @@ public class TestController {
             // Populating JSON Object
             obj.put("rows", arr);
 
+            System.out.println("writing json file");
             // Creating JSON File and writing the JSONObject into it
             File jsonFile = new File("/tmp/result.json");
             try {
@@ -127,17 +128,20 @@ public class TestController {
             } catch (IOException e) {
                 return HttpStatus.INTERNAL_SERVER_ERROR;
             }
+            System.out.println("wrote json file");
 
+            System.out.println("uploading results to s3");
             // Uploading Result to S3
             String[] uploadPathList = testDetails.s3KeyProjectFile.split("/");
             String unitCode = uploadPathList[0];
             String assignmentName = uploadPathList[1];
             String uploadPath = String.format("%s/%s/Results/result.json", unitCode, assignmentName);
             s3Client.uploadFile(uploadPath, jsonFile);
+            System.out.println("uploaded results to s3");
 
             // Return file content
             return HttpStatus.OK;
-        } catch (AmazonServiceException | IOException e) {
+        } catch (AmazonServiceException e) {
             System.err.println(e.getMessage());
 
             System.out.println("Failed to save file");
