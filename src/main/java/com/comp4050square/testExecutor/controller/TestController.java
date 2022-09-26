@@ -12,10 +12,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -48,11 +46,15 @@ public class TestController {
         final S3Client s3Client = new S3Client(bucketName);
 
         try {
+            System.out.println("testDetails.s3KeyTestFile: "+testDetails.s3KeyTestFile);
+            System.out.println("testDetails.s3KeyProjectile: "+testDetails.s3KeyProjectFile);
             // Storing the test file
             s3Client.downloadFile(testDetails.s3KeyTestFile, "/tmp/tmpTest.txt");
 
             // Getting list of files inside the projects
             Set<String> s3ProjectFiles = s3Client.listObjects(testDetails.s3KeyProjectFile);
+            s3ProjectFiles = s3ProjectFiles.stream().filter(file -> file.endsWith(".pde")).collect(Collectors.toSet());
+            System.out.println("s3ProjectFiles: "+s3ProjectFiles);
 
             // Storing the files locally
             for (String s3FilePath : s3ProjectFiles) {
@@ -74,12 +76,14 @@ public class TestController {
 
             // Storing the files locally
             for (String localProjectPath : projectPaths) {
+                System.out.println("localProjectPath: "+localProjectPath);
 
                 Map<String, String> studentResults = new LinkedHashMap<>();
 
                 // Retrieving SID and Student String
                 String[] projectList = localProjectPath.split("/");
                 String[] studentDetails = projectList[projectList.length - 2].split("_");
+                System.out.println("projectList: "+ Arrays.toString(projectList));
 
                 // Adding SID to Map
                 if (studentDetails.length < 1) {
