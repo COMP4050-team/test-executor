@@ -23,7 +23,7 @@ public class ProcessingToolsParser {
         String[] pathList = path.split("/");
         String outPath = String.format("/tmp/out/%s/%s", pathList[pathList.length - 2], pathList[pathList.length - 1]);
 
-        Process process = Runtime.getRuntime().exec(new String[]{"processing-java", "--force", "--sketch=" + path, "--output=" + outPath, "--build"});
+        Process process = Runtime.getRuntime().exec(new String[]{"/usr/local/bin/processing/processing-java", "--force", "--sketch=" + path, "--output=" + outPath, "--build"});
 
         InputStream serrStream = process.getErrorStream();
 
