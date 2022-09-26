@@ -5,38 +5,23 @@ import com.comp4050square.testExecutor.clients.S3Client;
 import com.comp4050square.testExecutor.parser.ProcessingToolsParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 
 @RestController
 public class TestController {
 
-    static class TestDetails {
-        String s3KeyTestFile;
-        String s3KeyProjectFile;
-
-        public String getS3KeyTestFile() {
-            return s3KeyTestFile;
-        }
-
-        public void setS3KeyTestFile(String s3KeyTestFile) {
-            this.s3KeyTestFile = s3KeyTestFile;
-        }
-
-        public String getS3KeyProjectFileKeyTestFile() {
-            return s3KeyProjectFile;
-        }
-
-        public void setS3KeyProjectFile(String s3KeyProjectFile) {
-            this.s3KeyProjectFile = s3KeyProjectFile;
-        }
-    }
-    String bucketName = "uploads-76078f4";
+    final String bucketName = "uploads-76078f4";
 
     private String readFile(String filePath) throws IOException {
         if (filePath == null) {
@@ -56,9 +41,9 @@ public class TestController {
         return sb.toString();
     }
 
-
     @PostMapping("/")
-    public String runTest(@RequestBody TestDetails testDetails) {
+    @ResponseStatus
+    public HttpStatus runTest(@RequestBody TestDetails testDetails) {
 
         final S3Client s3Client = new S3Client(bucketName);
 
@@ -77,7 +62,7 @@ public class TestController {
             }
 
             Set<String> projectPaths = new HashSet<>();
-            for(String filePath : s3ProjectFiles) {
+            for (String filePath : s3ProjectFiles) {
                 File file = new File("/tmp/" + filePath);
                 projectPaths.add(file.getParentFile().getAbsolutePath());
             }
@@ -85,31 +70,42 @@ public class TestController {
             // Creating JSON Object and Array
             JSONObject obj = new JSONObject();
             JSONArray arr = new JSONArray();
+            ProcessingToolsParser parser = new ProcessingToolsParser();
 
             // Storing the files locally
             for (String localProjectPath : projectPaths) {
 
-               Map<String, String> studentResults = new LinkedHashMap<>();
+                Map<String, String> studentResults = new LinkedHashMap<>();
 
                 // Retrieving SID and Student String
                 String[] projectList = localProjectPath.split("/");
-                String[] studentDetails = projectList[projectList.length-2].split("_");
+                String[] studentDetails = projectList[projectList.length - 2].split("_");
 
                 // Adding SID to Map
-                studentResults.put("SID", studentDetails[0]);
+                if (studentDetails.length < 1) {
+                    studentResults.put("SID", "Unknown");
+                } else {
+                    // TODO Regex validate
+                    studentResults.put("SID", studentDetails[0]);
+                }
 
                 // Adding Name to Map
-                studentResults.put("Name", studentDetails[1] + " " +studentDetails[2]);
+                if (studentDetails.length < 3) {
+                    studentResults.put("Name", "Unknown");
+                } else {
+                    // TODO Regex validate
+                    studentResults.put("Name", studentDetails[1] + " " + studentDetails[2]);
+                }
 
                 // TODO: Check the project structure is correct - i.e. Main.pde in a directory called Main
 
                 // Parsing the project file and creating the corresponding java file
-                ProcessingToolsParser parser = new ProcessingToolsParser();
                 Boolean testPass = parser.parse(localProjectPath);
-                if (testPass)
+                if (testPass) {
                     studentResults.put("Test", "Passed");
-                else
+                } else {
                     studentResults.put("Test", "Failed");
+                }
 
                 // Adding map to JSONArray and clearing the map
                 arr.put(studentResults);
@@ -125,22 +121,51 @@ public class TestController {
                 writer.write(obj.toString());
                 writer.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                return HttpStatus.INTERNAL_SERVER_ERROR;
             }
 
             // Uploading Result to S3
             String[] uploadPathList = testDetails.s3KeyProjectFile.split("/");
-            String uploadPath = String.format("%s/%s/Results/result.json", uploadPathList[0], uploadPathList[1]);
+            String unitCode = uploadPathList[0];
+            String assignmentName = uploadPathList[1];
+            String uploadPath = String.format("%s/%s/Results/result.json", unitCode, assignmentName);
             s3Client.uploadFile(uploadPath, jsonFile);
 
             // Return file content
-            return readFile("/tmp/tmpTest.txt");
+            return HttpStatus.OK;
         } catch (AmazonServiceException | IOException e) {
             System.err.println(e.getMessage());
 
             System.out.println("Failed to save file");
 
-            return "500 BAD";
+            // TODO actually send a 500 here
+            // TODO check whether this is our fault. If not send a 400
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+    }
+
+    static class TestDetails {
+        String s3KeyTestFile;
+        String s3KeyProjectFile;
+
+        public String getS3KeyTestFile() {
+            // /<unit code>/<assignment name>/Tests/<filename>.java
+            // eg. /COMP1000/A1/Tests/Test.java
+            return s3KeyTestFile;
+        }
+
+        public void setS3KeyTestFile(String s3KeyTestFile) {
+            this.s3KeyTestFile = s3KeyTestFile;
+        }
+
+        public String getS3KeyProjectFile() {
+            // /<unit code>/<assignment name>/Projects/
+            // eg. /COMP1000/A1/Projects/
+            return s3KeyProjectFile;
+        }
+
+        public void setS3KeyProjectFile(String s3KeyProjectFile) {
+            this.s3KeyProjectFile = s3KeyProjectFile;
         }
     }
 }
