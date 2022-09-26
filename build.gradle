@@ -15,7 +15,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
-	implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.307')
+	implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.310')
 	implementation 'com.amazonaws:aws-java-sdk-s3'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
