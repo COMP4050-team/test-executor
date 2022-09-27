@@ -1,0 +1,9 @@
+Dockerfile
+.idea
+.github
+fly.toml
+HELP.md
+.gradle/
+bin/
+build/
+gradle/
